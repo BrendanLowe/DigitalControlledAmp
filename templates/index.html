@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+
+    <title>Amp Main Page: {{ampname}}</title>
+  </head>
+   
+ </header>
+<body>
+  <div class="container">
+  
+    <div class="container-fluid"> <h1>{{ampname}}Main Amp Settings</h1> </div>
+
+    <div class="container-fluid">
+          <div class="row">
+              <div class="col-lg">
+                  <button type="button" id="apply" class="btn btn-primary btn-lg">Apply Settings</button>
+              </div>
+              <div class="col-lg">
+                  <button type="button" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#presetModal">Load Presets</button>
+              </div>
+              <div class="col-lg">
+                  <button type="button" id="save" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#presetModal">Save Settings</button>
+              </div>
+          </div>
+          <hr>
+          <div class="row"><h5 id='preset_name'>Preset = {{preset_name}}</h5> </div>
+          <hr>
+          <div class="row"><h5>Volume</h5></div>
+          <div class="input-group">
+			 	<input type="number" class="form-control" id="volume" placeholder="Volume" aria-label="Volume" aria-describedby="basic-addon2" value='{{volume}}'>
+  			   <div class="input-group-append">
+    				<button class="btn btn-primary" id='vminus' type="button">-</button>
+    				<button class="btn btn-success" id='vplus' type="button">+</button>
+  				</div>
+			</div>          
+          
+          <div class="progress">
+  				<!--<div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{volume}}%" aria-valuenow="{{volume}}" aria-valuemin="0" aria-valuemax="100"></div> -->
+			 </div>
+			 <hr>
+	   	 <div class="row"><h5>Tone</h5></div>
+          <div class="input-group">
+			 	<input type="number" class="form-control" id="tone" placeholder="Tone" aria-label="Tone" aria-describedby="basic-addon2" value='{{tone}}'>
+  			   <div class="input-group-append">
+    				<button class="btn btn-primary" id='tminus' type="button">-</button>
+    				<button class="btn btn-success" id='tplus' type="button">+</button>
+  				</div>
+			</div>          
+
+			 <div class="progress">
+  				<!--<div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: {{tone}}%" aria-valuenow="{{tone}}" aria-valuemin="0" aria-valuemax="100"></div>-->
+			 </div>
+	   	 <hr>
+      </div>
+  </div>
+
+<!-- Modal -->
+<div class="modal fade" id="presetModal" tabindex="-1" role="dialog" aria-labelledby="presetModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="presetModalLabel"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+			<!-- Location for Table and Save Information -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" id='mod-btn' value='' class="btn btn-primary"></button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End of Modal -->
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+	 <script>
+	   // Get the preset information from the API in JSON format.
+	 	// Clear out the modal and Reset in case the Save function has been called
+	 	// Load all the preset options.
+		function getPresets(){
+			$.get( "api?presets", function( data ) {
+				//console.log(data);
+				$(".modal-title").empty().html("{{ampname}} Preset Settings");
+				$('.modal-body').empty().append("<table name='preset_table' class='table'></table>");
+				$('table').append("<thead class='thead-dark'>"+
+												"<tr><th scope='col'>#</th><th scope='col'>Preset Name</th><th scope='col'>Volume</th><th scope='col'>Tone</th><th scope='col'>Delete</th></tr></thead>"+
+  												"<tbody id='preset_body'></tbody>");
+  				$("#mod-btn").empty().html("Load Preset").val("load");				
+				$.each(data.info, function(){
+					//console.log(this);
+					$('tbody').append("<tr class='clickable-row'><th scope='row'><input type='radio' name='preset' aria-label='Radio button for Preset "+ this.preset_id+
+												"' value='"+ this.preset_id+
+												"'</td><td>"+this.preset_name+"</td><td class='vv'>"+this.volume+"</td><td class='tv'>"+
+												this.tone+"</td><td><button type='button' value='"+this.preset_id+
+												"'class='delete btn btn-danger'>Delete</button></td></tr>");							
+				});	
+			}, "json" );		
+		}
+
+
+	
+		// Change the Setting
+		function Setting_Adjustment(change_id, change_num){
+			console.log(change_id);
+			if( parseInt( $(change_id).val()) == 100 && change_num > 0 ){
+				var newsetting = $(change_id).val();
+			} else if( parseInt( $(change_id).val()) == 0 && change_num < 0 ){
+				var newsetting = $(change_id).val();
+			}
+			else{
+				var newsetting = parseInt( $(change_id).val()) + change_num;
+			}
+						
+			console.log(newsetting);
+			$(change_id).val(newsetting);
+		}	 	
+	 	
+	 	// Set up the modal to act as a save Settings.
+		function SaveSettingsModal(){
+			$(".modal-title").empty().html("Save Current Settings to Preset");		
+			$('.modal-body').empty().html("<label for='basic-url'>New Preset Name</label><div class='input-group mb-3'><div class='input-group-prepend'></div><input type='text' class='form-control' id='new_preset' aria-describedby='basic-addon3'></div>");
+			$("#mod-btn").empty().html("Save Preset").val("save");
+	
+		}
+
+		// Load the presets as soon as the page is ready
+		$(document).ready(function(){
+			getPresets();
+		});
+		
+		// Apply settings to the current settings table and then apply to amp hardware.
+		$("#apply").click(function() {
+			
+			var new_name = $('#preset_name').html().slice(9);
+			var new_volume = $('#volume').val();
+			var new_tone = $('#tone').val();
+  			$.post( "api", { apply_settings: true, new_preset: new_name, volume: new_volume, tone: new_tone }, function( data ) {
+						console.log(data);			
+				}, "json");
+		});
+
+		
+		// Obtain the Preset information from the server and update the main page.
+		$("#mod-btn").click(function() {
+			  		
+			var btn_check = $("#mod-btn").val();
+			console.log(btn_check);
+			if(btn_check === 'load'){
+							var preset_url =  "api?preset&id=" + $('input:radio[name=preset]:checked').val();
+				$.get( preset_url, function( data ) {
+					$('#preset_name').empty().text('Preset = ' + data.info.preset_name);				
+					$('#volume').val(data.info.volume);
+					$('#tone').val(data.info.tone);
+				}, "json" );
+				$('#presetModal').modal('hide');
+			}
+			if(btn_check === 'save') {
+			
+				var preset_save = $('#new_preset').val();
+				var preset_volume = $('#volume').val();
+				var preset_tone = $('#tone').val();
+				$.post( "api", { save: true, new_preset: preset_save, volume: preset_volume, tone: preset_tone }, function( data ) {
+						console.log(data);			
+  						$('#preset_name').empty().text('Preset = ' + preset_save);
+  						$('#presetModal').modal('hide');
+				}, "json");
+			}
+
+			
+		});
+		
+		// Function for deleting presets.
+		
+		$( '.modal-body' ).on( "click", ".delete", function() {
+			
+			var preset_id = $(this).val()
+			$.post( "api", { delete_preset: true, id: preset_id }, function( data ) {
+				console.log(data);
+			}, "json");
+			
+			getPresets();			
+
+		});
+		
+		// Function for setting up the modal to be for saving presets.
+		$("#save").click(function() {
+			SaveSettingsModal();
+		});
+		
+		// Volume Plus		
+		$('#vplus').click(function() {
+			$('#preset_name').empty().text('Preset = None');
+			Setting_Adjustment('#volume', 1);
+		});
+		
+		// Volume Minus
+		$('#vminus').click(function() {
+			$('#preset_name').empty().text('Preset = None');
+			Setting_Adjustment('#volume', -1);
+		});
+		
+		// Tone Plus		
+		$('#tplus').click(function() {
+			$('#preset_name').empty().text('Preset = None');
+			Setting_Adjustment('#tone', 1);
+		});
+		
+		// Tone Minus
+		$('#tminus').click(function() {
+			$('#preset_name').empty().text('Preset = None');
+			Setting_Adjustment('#tone', -1);
+		});		
+		
+		
+		// Makes sure that the modal is clear and reloaded with preset
+		$('#presetModal').on('hidden.bs.modal', function () {
+			getPresets();
+		});
+		
+	 </script>
+  </body>
+</html>
